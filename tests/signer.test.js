@@ -62,3 +62,33 @@ test("signing with the other hand is not counted against you", () => {
   assert.ok(hints.some((h) => /left hand/.test(h.text)), JSON.stringify(hints));
   assert.ok(!done?.correct);
 });
+
+/* Hold a pose: the last frames of a clip, repeated, as a still hand. */
+function holdPose(clip, letter, ms = 3000) {
+  let done = null, fn = null, hints = [];
+  const r = runSign({ model, hand: "right", letter, mode: "recall", subscribe: (f) => { fn = f; return () => { fn = null; }; },
+    onProgress: () => {}, onHint: (h) => hints.push(h), onStatus: () => {}, onDone: (d) => { done = d; } });
+  // the frames of the recorded hold itself (1.2-2.0 s into the clip)
+  const tail = fx.clips[clip].filter((f) => f.lm && f.t >= 1200 && f.t <= 2000);
+  for (let t = 0, i = 0; t < ms && fn; t += 33, i++) {
+    const f = tail[i % tail.length];
+    fn({ t, flat: f.lm, aspect: fx.aspect, videoHeight: fx.height, handedness: f.h });
+  }
+  r.stop();
+  return { done, hints };
+}
+
+test("the same letter twice in a row: still holding it counts for the second one", () => {
+  const first = play("L", "L", "recall");
+  assert.ok(first.done?.correct);
+  const second = holdPose("L", "L");
+  assert.ok(second.done?.correct, "the held L should be accepted without moving");
+});
+
+test("a different letter next: the held pose is not graded against it", () => {
+  const first = play("L", "L", "recall");
+  assert.ok(first.done?.correct);
+  const next = holdPose("L", "Y");
+  assert.equal(next.done, null, "nothing graded while the old L is still held");
+  assert.equal(next.hints.length, 0);
+});

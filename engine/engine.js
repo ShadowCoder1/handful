@@ -220,8 +220,12 @@ export function createEngine({ model, letters, hintPolicy = "strict", commitOpts
     /* A new trial. nextTrial(), NOT reset(), on the committer: a pose still
      * held up from the last letter must not be graded against this one
      * (tutor/commit.js nextTrial has the story). */
-    startTrial(trial) {
-      committer.nextTrial();
+    startTrial(trial, { carryOver = false } = {}) {
+      // Handful: when the new item asks for the very letter the learner has
+      // just signed correctly and is still holding, that hold is the answer.
+      // Only then is the committer fully reset; otherwise nextTrial() keeps
+      // an old pose from being graded against a new letter.
+      if (carryOver) committer.reset(); else committer.nextTrial();
       flow = createFlow({ model, letters, hintPolicy, deps, gradeAll, handName: hand });
       recent = [];
       pending = [];

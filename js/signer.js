@@ -22,6 +22,7 @@ import { hint, madeInstead, TIPS } from "./course.js";
 import { onFrame } from "./camera.js";
 
 let engine = null, engineHand = null;
+let lastRight = null;   // the letter most recently signed correctly, if the hand may still be holding it
 export function getEngine(model, hand) {
   if (!engine || engineHand !== hand) {
     engine = createEngine({ model, letters: LETTERS, hintPolicy: "strict", gradeAll: true, hand });
@@ -45,7 +46,9 @@ export function getEngine(model, hand) {
 export function runSign({ model, hand, letter, mode, onProgress, onHint, onStatus, onDone, subscribe = onFrame }) {
   const eng = getEngine(model, hand);
   let trial = 0, misses = 0, finished = false, lastRival = null, lastPart = null, helped = 0;
-  const start = () => eng.startTrial({ id: `h${Date.now()}_${trial++}`, letter, kind: "teach" });
+  // The same letter again straight after getting it right: keep holding and
+  // it counts. Any other letter needs the hand to change first.
+  const start = () => eng.startTrial({ id: `h${Date.now()}_${trial}`, letter, kind: "teach" }, { carryOver: trial++ === 0 && lastRight === letter });
   start();
   let t0 = null;
 
@@ -97,13 +100,14 @@ export function runSign({ model, hand, letter, mode, onProgress, onHint, onStatu
 
   function finish(r) {
     finished = true;
+    lastRight = r.correct ? letter : null;
     off();
     onProgress(0);
     onDone({ ...r, rival: lastRival, part: lastPart });
   }
 
   return {
-    stop() { finished = true; off(); },
+    stop() { if (!finished) lastRight = null; finished = true; off(); },
     skip() { if (!finished) finish({ correct: false, how: "assisted", misses, skipped: true }); },
   };
 }
