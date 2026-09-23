@@ -226,8 +226,7 @@ function welcome() {
           `<button class="opt ${draft.goal === g ? "sel" : ""}" data-goal="${g}">${ICON.target()}<div><b>${a}</b><span>${b} a day, about ${g * 4} minutes</span></div></button>`).join("")}
       </div>`,
     () => `<div class="say">${mascot("laptop", { size: 120 })}<div class="bubble">Last thing. I need your camera to see your hand.</div></div>
-      <div class="note">${ICON.eye({ size: 26 })}<span>The video never leaves your device. Nothing is recorded or sent anywhere, and your progress is saved in this browser only.</span></div>
-      <div class="note" style="background:var(--apricot-soft);color:var(--apricot-ink)">${ICON.hand({ size: 26 })}<span>This teaches the fingerspelling alphabet, not ASL itself. For ASL, learn from Deaf teachers.</span></div>`,
+      <div class="note">${ICON.eye({ size: 26 })}<span>The video never leaves your device. Nothing is recorded or sent anywhere, and your progress is saved in this browser only.</span></div>`,
   ];
   const draw = () => {
     const last = step === steps.length - 1;
@@ -608,7 +607,7 @@ function settingsPage() {
     <div class="panel" style="margin-bottom:16px"><h3>Sound</h3><div class="opts two">${opt("sound", "on", "On", S.sound ? "on" : "off")}${opt("sound", "off", "Off", S.sound ? "on" : "off")}</div></div>
     <div class="panel" style="margin-bottom:16px"><h3>Your name</h3><input class="field" id="nm" maxlength="20" value="${esc(S.name)}" placeholder="First name"></div>
     <div class="panel"><h3>Start over</h3><p class="sub" style="margin:0 0 14px">Forget every letter and begin again from the welcome screen.</p><button class="btn bad small" data-reset>Reset my progress</button></div>
-    <p class="sub" style="margin:24px 4px;color:var(--muted);font-size:14px">Handful teaches the fingerspelling alphabet, not ASL. Grading comes from a model trained on public hand data and can be wrong. Hand pictures: public domain.</p>`);
+    <p class="sub" style="margin:24px 4px;color:var(--muted);font-size:14px">Grading comes from a model trained on public hand data and can be wrong. Hand pictures: public domain.</p>`);
   root.querySelectorAll("[data-set]").forEach((b) => b.addEventListener("click", () => {
     const { set, val } = b.dataset;
     if (set === "hand") S.hand = val;
