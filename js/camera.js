@@ -59,9 +59,24 @@ export function attachView(container) {
   canvas.className = "cam-dots";
   container.append(state.video, canvas);
   state.video.className = "cam-video";
+  // Moving the video to a new exercise takes it out of the page for a moment,
+  // and a browser pauses any video removed from the page (the HTML spec says
+  // it must). Paused, it shows black and gives the tracker no new frames, so
+  // it is started again every time it is placed.
+  resume(state.video);
   const view = { container, canvas, ctx: canvas.getContext("2d") };
   state.view = view;
   return () => { if (state?.view === view) state.view = null; canvas.remove(); };
+}
+
+function resume(video) {
+  if (!video.paused) return;
+  video.play().catch(() => {});
+  // Safari can refuse the first call while the element is still settling in
+  // its new place; try again on the next frames until it runs.
+  let tries = 0;
+  const again = () => { if (video.paused && tries++ < 30) { video.play().catch(() => {}); requestAnimationFrame(again); } };
+  requestAnimationFrame(again);
 }
 
 export function onFrame(fn) {
