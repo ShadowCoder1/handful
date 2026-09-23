@@ -12,12 +12,12 @@
  * (js/signer.js decides which one a learner needs). */
 
 export const UNITS = [
-  { id: "u1", title: "First signs", blurb: "Five shapes that look nothing alike.", color: "tangerine", letters: ["B", "L", "Y", "I", "V"] },
-  { id: "u2", title: "Round and closed", blurb: "Fists and curves. A, S and E are close cousins.", color: "fern", letters: ["A", "S", "E", "O", "C"] },
-  { id: "u3", title: "Pointing", blurb: "One or more fingers up, the rest tucked.", color: "sky", letters: ["D", "F", "W", "K", "X"] },
-  { id: "u4", title: "Tucked thumbs", blurb: "Where the thumb hides is the whole difference.", color: "berry", letters: ["M", "N", "T", "U", "R"] },
-  { id: "u5", title: "Sideways and down", blurb: "Same shapes, new directions.", color: "gold", letters: ["G", "H", "P", "Q"] },
-  { id: "u6", title: "Letters that move", blurb: "Draw them in the air.", color: "lagoon", letters: ["J", "Z"] },
+  { id: "u1", title: "First signs", blurb: "Five shapes that look nothing alike.", color: "apricot", letters: ["B", "L", "Y", "I", "V"] },
+  { id: "u2", title: "Round and closed", blurb: "Fists and curves. A, S and E are close cousins.", color: "sage", letters: ["A", "S", "E", "O", "C"] },
+  { id: "u3", title: "Pointing", blurb: "One or more fingers up, the rest tucked.", color: "dusk", letters: ["D", "F", "W", "K", "X"] },
+  { id: "u4", title: "Tucked thumbs", blurb: "Where the thumb hides is the whole difference.", color: "clay", letters: ["M", "N", "T", "U", "R"] },
+  { id: "u5", title: "Sideways and down", blurb: "Same shapes, new directions.", color: "mustard", letters: ["G", "H", "P", "Q"] },
+  { id: "u6", title: "Letters that move", blurb: "Draw them in the air.", color: "forest", letters: ["J", "Z"] },
 ];
 
 export const ALL_LETTERS = UNITS.flatMap((u) => u.letters);

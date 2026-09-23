@@ -13,13 +13,14 @@
 import { UNITS, ALL_LETTERS, TIPS, PRAISE, PRAISE_AFTER_HELP, CONFUSABLE, hint } from "./course.js";
 import { load, save, letterOf, strength, isMastered, record, finishLesson, currentStreak, dayKey, worstRival, newState } from "./learner.js";
 import { PATH, ALL_NODES, nodeStatus, buildLesson, requeue, shuffle, distractors } from "./planner.js";
-import { ICON, kabir, confetti } from "./art.js";
+import { ICON, mascot, confetti } from "./art.js";
 import { sfx, setSound } from "./sfx.js";
 import { startCamera, attachView, cameraReady } from "./camera.js";
 import { runSign } from "./signer.js";
 import { pictureMirrored } from "../tutor/letters.js";
 import { loadModel } from "../tutor/verifier.js";
 
+const POSE_FOR = { think: "encourage", happy: "encourage", cheer: "excited", warn: "learning" };
 const root = document.getElementById("root");
 let S = load();
 setSound(S.sound);
@@ -62,7 +63,7 @@ function frame(active, body, aside = defaultAside()) {
   root.innerHTML = `
   <div class="app">
     <nav class="rail">
-      <a class="brand" href="#/"><img class="brand-mark" src="assets/icon.svg" alt=""><span>handful</span></a>
+      <a class="brand" href="#/"><img class="brand-mark" src="assets/logo-64.png" alt=""><span>handful</span></a>
       ${navs}
     </nav>
     <main class="main"><div class="col">
@@ -97,7 +98,7 @@ function defaultAside() {
     <div class="panel">
       <h3>Daily goal</h3>
       <div class="goal">
-        <div class="ring c-tangerine" style="--p:${p}">${p >= 1 ? ICON.check({ size: 26 }) : ICON.target({ size: 24 })}</div>
+        <div class="ring c-forest" style="--p:${p}">${p >= 1 ? ICON.check({ size: 26 }) : ICON.target({ size: 24 })}</div>
         <div><b style="font-family:var(--display);font-size:18px">${today.lessons} of ${S.goal} ${S.goal === 1 ? "lesson" : "lessons"}</b>
         <div class="sub">${p >= 1 ? "Done for today. Nice." : "A few minutes is plenty."}</div></div>
       </div>
@@ -138,7 +139,7 @@ function home() {
         <div><div class="eyebrow">Unit ${ui + 1}</div><h2>${esc(unit.title)}</h2><p>${esc(unit.blurb)}</p></div>
         <button class="btn" data-guide="${unit.id}">${ICON.eye({ size: 20 })}Signs</button>
       </div>
-      <div class="trail">${nodesHtml}<div class="trail-kabir ${side}">${kabir(ui === 0 ? "happy" : ui % 3 === 1 ? "think" : "cheer", { size: 150, wave: ui === 0 })}</div></div>
+      <div class="trail">${nodesHtml}<div class="trail-mascot ${side}">${mascot(["encourage", "learning", "laptop", "proud", "rest", "excited"][ui % 6], { size: 150 })}</div></div>
     </section>`;
   }).join("");
   frame("learn", units);
@@ -205,28 +206,28 @@ function welcome() {
   const draft = { name: S.name, hand: S.hand, goal: S.goal };
   const steps = [
     () => `<div class="hero">
-      ${kabir("happy", { size: 260, wave: true })}
+      ${mascot("wave", { size: 300, anim: "float" })}
       <div>
         <h1>Learn to fingerspell with <em>your own hands.</em></h1>
         <p>Your camera watches your hand and tells you what to fix. A few minutes a day and you'll know the whole alphabet.</p>
         <div class="cta"><button class="btn wide" data-next>Get started</button><button class="btn ghost wide" data-knows>I know some letters already</button></div>
       </div></div>`,
-    () => `<div class="say">${kabir("happy", { size: 110 })}<div class="bubble">Hi, I'm Kabir. Which hand do you write with?</div></div>
+    () => `<div class="say">${mascot("encourage", { size: 120 })}<div class="bubble">Hi, I'm Pip! Which hand do you write with?</div></div>
       <div class="opts two">
         <button class="opt big ${draft.hand === "right" ? "sel" : ""}" data-hand="right">${ICON.hand()}<b>Right hand</b><span>You'll sign with your right</span></button>
         <button class="opt big ${draft.hand === "left" ? "sel" : ""}" data-hand="left"><span class="flip" style="display:block">${ICON.hand()}</span><b>Left hand</b><span>You'll sign with your left</span></button>
       </div>`,
-    () => `<div class="say">${kabir("think", { size: 110 })}<div class="bubble">What should I call you?</div></div>
+    () => `<div class="say">${mascot("learning", { size: 120 })}<div class="bubble">What should I call you?</div></div>
       <input class="field" id="name" maxlength="20" autocomplete="given-name" placeholder="Your first name" value="${esc(draft.name)}">
       <div class="note">${ICON.abc({ size: 26 })}<span>Once you've learned its letters, you'll get to spell it.</span></div>`,
-    () => `<div class="say">${kabir("happy", { size: 110 })}<div class="bubble">How much a day sounds good?</div></div>
+    () => `<div class="say">${mascot("proud", { size: 120 })}<div class="bubble">How much a day sounds good?</div></div>
       <div class="opts">
         ${[[1, "Easy going", "One lesson"], [2, "Steady", "Two lessons"], [3, "Keen", "Three lessons"]].map(([g, a, b]) =>
           `<button class="opt ${draft.goal === g ? "sel" : ""}" data-goal="${g}">${ICON.target()}<div><b>${a}</b><span>${b} a day, about ${g * 4} minutes</span></div></button>`).join("")}
       </div>`,
-    () => `<div class="say">${kabir("happy", { size: 110 })}<div class="bubble">Last thing. I need your camera to see your hand.</div></div>
+    () => `<div class="say">${mascot("laptop", { size: 120 })}<div class="bubble">Last thing. I need your camera to see your hand.</div></div>
       <div class="note">${ICON.eye({ size: 26 })}<span>The video never leaves your device. Nothing is recorded or sent anywhere, and your progress is saved in this browser only.</span></div>
-      <div class="note" style="background:var(--tangerine-soft);color:var(--tangerine-ink)">${ICON.hand({ size: 26 })}<span>This teaches the fingerspelling alphabet, not ASL itself. For ASL, learn from Deaf teachers.</span></div>`,
+      <div class="note" style="background:var(--apricot-soft);color:var(--apricot-ink)">${ICON.hand({ size: 26 })}<span>This teaches the fingerspelling alphabet, not ASL itself. For ASL, learn from Deaf teachers.</span></div>`,
   ];
   const draw = () => {
     const last = step === steps.length - 1;
@@ -274,7 +275,7 @@ async function lesson(id) {
     plan = buildLesson(node, S, now(), Math.random, { camera: camOK });
   }
   if (!plan.items.length) {
-    frame("practice", `<div style="text-align:center;padding:60px 0">${kabir("think", { size: 170 })}<h2 style="margin:18px 0 8px">Nothing to practise yet</h2><p style="color:var(--muted)">Learn a few letters first, then come back here.</p><a class="btn" href="#/">Go to the path</a></div>`);
+    frame("practice", `<div style="text-align:center;padding:60px 0">${mascot("rest", { size: 190 })}<h2 style="margin:18px 0 8px">Nothing to practise yet</h2><p style="color:var(--muted)">Learn a few letters first, then come back here.</p><a class="btn" href="#/">Go to the path</a></div>`);
     return;
   }
   const L = { node, items: plan.items, i: 0, camera: plan.camera, right: 0, total: 0, combo: 0, best: 0, t0: now(), touched: new Set(), before: {} };
@@ -291,7 +292,7 @@ async function lesson(id) {
   </div>`;
   const stage = root.querySelector("#stage"), foot = root.querySelector("#foot"), footin = root.querySelector("#footin");
   root.querySelector("[data-quit]").addEventListener("click", () => {
-    const m = modal(`<div style="text-align:center">${kabir("think", { size: 130 })}<h2 style="margin:10px 0 8px">Leave this lesson?</h2><p>You'll lose your progress in it.</p>
+    const m = modal(`<div style="text-align:center">${mascot("learning", { size: 130 })}<h2 style="margin:10px 0 8px">Leave this lesson?</h2><p>You'll lose your progress in it.</p>
       <div class="row"><button class="btn ghost" data-close>Keep going</button><button class="btn bad" data-leave>Leave</button></div></div>`);
     m.el.querySelector("[data-leave]").addEventListener("click", () => { m.close(); go("#/"); });
   });
@@ -394,11 +395,11 @@ async function lesson(id) {
       <div class="sign">
         <div class="sign-left"><div class="target"><div class="hold"><svg viewBox="0 0 196 196"><circle class="track" cx="98" cy="98" r="92"/><circle class="fill" cx="98" cy="98" r="92"/></svg><div class="glyph">${l}</div></div>
           <div class="picwrap">${copy ? `<img class="pic ${flip(l)}" src="${pic(l)}" alt="">` : ""}</div></div>
-          <div class="coach">${kabir("happy", { size: 72 })}<div class="bubble">${copy ? "Copy the picture, then hold still until the circle fills." : check ? "No help on this one. Hold it still when you're ready." : "Make the sign, then hold still."}</div></div></div>
+          <div class="coach">${mascot("encourage", { size: 84 })}<div class="bubble">${copy ? "Copy the picture, then hold still until the circle fills." : check ? "No help on this one. Hold it still when you're ready." : "Make the sign, then hold still."}</div></div></div>
         <div class="cam"></div>
       </div>`;
     const hold = box.querySelector(".hold"), cam = box.querySelector(".cam"), coach = box.querySelector(".coach"), picwrap = box.querySelector(".picwrap");
-    const say = (text, tone = "", mood = "think") => { coach.innerHTML = `${kabir(mood, { size: 72 })}<div class="bubble ${tone}">${esc(text)}</div>`; };
+    const say = (text, tone = "", mood = "think") => { coach.innerHTML = `${mascot(POSE_FOR[tone === "warn" ? "warn" : mood], { size: 84, anim: mood === "cheer" ? "bounce" : "pop" })}<div class="bubble ${tone}">${esc(text)}</div>`; };
     const cb = camBox(cam);
     let run = null, stopped = false;
     footer({ left: `<button class="btn text" data-nocam>Can't use the camera now</button>`, button: "Skip", onClick: () => run?.skip() ?? nextItem() });
@@ -434,10 +435,10 @@ async function lesson(id) {
     box.innerHTML = `<div class="ex-head"><div class="ex-kind">${ICON.abc({ size: 20 })}Spell it</div><h2 class="ex-title">Fingerspell “${word.toLowerCase()}”</h2></div>
       <div class="word">${[...word].map((c, i) => `<div class="tile ${i === 0 ? "now" : ""}">${c}</div>`).join("")}</div>
       <div class="sign"><div class="sign-left"><div class="target"><div class="hold"><svg viewBox="0 0 196 196"><circle class="track" cx="98" cy="98" r="92"/><circle class="fill" cx="98" cy="98" r="92"/></svg><div class="glyph">${word[0]}</div></div><div class="picwrap"></div></div>
-        <div class="coach">${kabir("happy", { size: 72 })}<div class="bubble">One letter at a time. Hold each one until the circle fills.</div></div></div>
+        <div class="coach">${mascot("encourage", { size: 84 })}<div class="bubble">One letter at a time. Hold each one until the circle fills.</div></div></div>
         <div class="cam"></div></div>`;
     const tiles = [...box.querySelectorAll(".tile")], hold = box.querySelector(".hold"), glyph = box.querySelector(".glyph"), cam = box.querySelector(".cam"), coach = box.querySelector(".coach"), picwrap = box.querySelector(".picwrap");
-    const say = (text, tone = "", mood = "think") => { coach.innerHTML = `${kabir(mood, { size: 72 })}<div class="bubble ${tone}">${esc(text)}</div>`; };
+    const say = (text, tone = "", mood = "think") => { coach.innerHTML = `${mascot(POSE_FOR[tone === "warn" ? "warn" : mood], { size: 84, anim: mood === "cheer" ? "bounce" : "pop" })}<div class="bubble ${tone}">${esc(text)}</div>`; };
     const cb = camBox(cam);
     footer({ left: `<button class="btn text" data-nocam>Can't use the camera now</button>`, button: "Skip", onClick: () => { run?.stop(); nextItem(); } });
     footin.querySelector("[data-nocam]").addEventListener("click", noCamera);
@@ -534,12 +535,12 @@ async function lesson(id) {
     const ui = UNITS.findIndex((u) => u.id === node.unit);
     const nextCheck = isCheck && ui >= 0 && UNITS[ui + 1] ? `${UNITS[ui + 1].id}-check` : null;
     root.innerHTML = `<div class="lesson"><div></div><div class="finish">
-      ${kabir(passed ? "cheer" : "think", { size: 190 })}
+      ${mascot(passed ? "jump" : "encourage", { size: 220, anim: passed ? "bounce" : "idle" })}
       <h1>${passed ? (isCheck ? "Unit complete!" : "Lesson complete!") : "Nearly there"}</h1>
-      <p class="lede">${passed ? (L.best >= 5 ? `${L.best} in a row. You're on a roll.` : "Every rep counts. See you tomorrow?") : "You need 4 out of 5 to pass the check. The practice before it will get you there."}</p>
+      <p class="lede">${passed ? (L.best >= 5 ? `${L.best} in a row. You're on a roll.` : acc < 0.6 ? "Some of those were tricky. They'll come back soon, and they'll get easier." : "Every rep counts. See you tomorrow?") : "You need 4 out of 5 to pass the check. The practice before it will get you there."}</p>
       <div class="tiles3">
         <div class="tally" style="--t:var(--gold)"><div class="th">XP</div><div class="tb">${ICON.bolt()}${xp}</div></div>
-        <div class="tally" style="--t:var(--fern)"><div class="th">${acc >= 0.9 ? "Amazing" : "Accuracy"}</div><div class="tb">${ICON.target()}${Math.round(acc * 100)}%</div></div>
+        <div class="tally" style="--t:var(--good)"><div class="th">${acc >= 0.9 ? "Amazing" : "Accuracy"}</div><div class="tb">${ICON.target()}${Math.round(acc * 100)}%</div></div>
         <div class="tally" style="--t:var(--sky)"><div class="th">Time</div><div class="tb">${ICON.clock()}${mm}</div></div>
       </div>
       ${skills ? `<div class="skills"><h3 style="margin-bottom:6px">Letters you worked on</h3>${skills}</div>` : ""}

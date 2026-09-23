@@ -51,4 +51,5 @@ teachers.
     python3 tools/serve.py        # http://localhost:8020/
     npm test
 
-Hand pictures: public domain (CC0). Nunito: SIL Open Font License.
+The mascot, Pip, and the logo come from the Handful brand sheet (`assets/mascot/`,
+`assets/logo.png`). Hand pictures: public domain (CC0). Nunito: SIL Open Font License.

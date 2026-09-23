@@ -31,49 +31,28 @@ export const ICON = {
   hand: (o) => svg(`<path d="M8 12V5.8a1.6 1.6 0 0 1 3.2 0V11M11.2 10.5V4.4a1.6 1.6 0 0 1 3.2 0v6.1M14.4 10.8V6a1.6 1.6 0 0 1 3.2 0v7.5c0 4.2-2.6 7.2-6.3 7.2-2.6 0-4.1-1.3-5.3-3.2l-2.2-3.6a1.5 1.5 0 0 1 2.4-1.8L8 14"/>`, o),
 };
 
-/* ---- the mascot: Kabir ------------------------------------------------------
- * The same character as the demo films, as a small drawing with moods. */
-const SK = "#b9794f", SK_LIGHT = "#c98a60", SK_SHADE = "#a0643f", HAIR = "#1b1411", TOP = "#3f6fae", TOP_SHADE = "#335d95";
+/* ---- the mascot: Pip ------------------------------------------------------------
+ * A friendly hand with a satchel, from the Handful brand sheet. Each mood is
+ * its own drawing (assets/mascot/*.webp); the life comes from CSS: a slow
+ * breath while idle, a squash-and-stretch pop whenever the pose changes, and
+ * a bounce when there's something to celebrate.
+ *
+ *   wave       hello, the welcome screen
+ *   encourage  pointing the way: instructions and hints
+ *   learning   reading a book: thinking, new material
+ *   excited    hands clasped: a right answer
+ *   proud      a wink and a star
+ *   jump       celebrating the end of a lesson
+ *   laptop     at the computer: the camera
+ *   rest       lying down: nothing to do yet */
+export const POSES = ["wave", "encourage", "learning", "excited", "proud", "jump", "laptop", "rest"];
 
-export function kabir(mood = "happy", { size = 160, wave = false } = {}) {
-  const eyes = mood === "cheer"
-    ? `<path d="M41 57q6-7 12 0M67 57q6-7 12 0" stroke="#1d1410" stroke-width="3.6" fill="none" stroke-linecap="round"/>`
-    : mood === "think"
-      ? `<ellipse cx="48" cy="57" rx="4.6" ry="6" fill="#1d1410"/><ellipse cx="72" cy="57" rx="4.6" ry="6" fill="#1d1410"/><circle cx="50" cy="54.5" r="1.7" fill="#fff"/><circle cx="74" cy="54.5" r="1.7" fill="#fff"/>`
-      : `<ellipse cx="47" cy="58" rx="4.8" ry="6.4" fill="#1d1410"/><ellipse cx="73" cy="58" rx="4.8" ry="6.4" fill="#1d1410"/><circle cx="49" cy="55.4" r="1.8" fill="#fff"/><circle cx="75" cy="55.4" r="1.8" fill="#fff"/>`;
-  const mouth = mood === "cheer"
-    ? `<path d="M49 73q11 13 22 0Z" fill="#5a2a1f"/><path d="M51 74q9 5 18 0" fill="#f6efe8"/>`
-    : mood === "think"
-      ? `<path d="M52 76q7-3 14 1" stroke="#5a2a1f" stroke-width="3" fill="none" stroke-linecap="round"/>`
-      : `<path d="M50 72q10 8 20 0q-10 12-20 0Z" fill="#5a2a1f"/><path d="M52 73q8 3 16 0" stroke="#f6efe8" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
-  const brows = mood === "think"
-    ? `<path d="M40 45q7-5 13-1M67 42q7-2 13 2" stroke="${HAIR}" stroke-width="3.8" fill="none" stroke-linecap="round"/>`
-    : `<path d="M40 46q7-5 13-2M67 44q7-3 13 2" stroke="${HAIR}" stroke-width="3.8" fill="none" stroke-linecap="round"/>`;
-  const arm = wave
-    ? `<g class="kabir-wave"><path d="M96 118q14-10 16-34" stroke="${TOP}" stroke-width="15" fill="none" stroke-linecap="round"/>
-       <g transform="translate(112 76)"><rect x="-8" y="-24" width="16" height="22" rx="8" fill="${SK}"/>
-       <rect x="-10" y="-40" width="5.5" height="20" rx="2.75" fill="${SK}"/><rect x="-4" y="-44" width="5.5" height="24" rx="2.75" fill="${SK}"/><rect x="2" y="-42" width="5.5" height="22" rx="2.75" fill="${SK}"/><rect x="7.5" y="-37" width="5" height="18" rx="2.5" fill="${SK}"/><rect x="-16" y="-20" width="9" height="5.5" rx="2.75" fill="${SK}" transform="rotate(-35 -12 -17)"/></g></g>`
-    : "";
-  return `<svg class="kabir kabir-${mood}" width="${size}" height="${size}" viewBox="${wave ? "0 0 136 140" : "0 0 120 140"}" aria-hidden="true">
-    <path d="M16 140c0-22 12-34 28-37h32c16 3 28 15 28 37Z" fill="${TOP}"/>
-    <path d="M16 140c0-22 12-34 28-37h6c-10 5-18 18-18 37Z" fill="${TOP_SHADE}" opacity=".7"/>
-    <path d="M52 88h16v18q-8 5-16 0Z" fill="${SK_SHADE}"/>
-    <path d="M47 103q13 9 26 0" stroke="#2f5588" stroke-width="4" fill="none" stroke-linecap="round"/>
-    <ellipse cx="22.5" cy="60" rx="6" ry="7.5" fill="${SK_SHADE}"/><ellipse cx="97.5" cy="60" rx="6" ry="7.5" fill="${SK_SHADE}"/>
-    <path d="M60 22c21 0 38 14 38 36 0 20-15 36-38 36S22 78 22 58c0-22 17-36 38-36Z" fill="${SK}"/>
-    <ellipse cx="50" cy="48" rx="20" ry="15" fill="${SK_LIGHT}" opacity=".45"/>
-    <ellipse cx="38" cy="71" rx="7" ry="4.2" fill="#d6785f" opacity=".3"/><ellipse cx="82" cy="71" rx="7" ry="4.2" fill="#d6785f" opacity=".3"/>
-    ${eyes}${brows}
-    <ellipse cx="60" cy="66" rx="4.2" ry="3.2" fill="${SK_SHADE}"/>
-    ${mouth}
-    <path d="M21 60c-3-26 12-44 38-44 23 0 39 12 40 34 0 5-1 9-2 12-2-8-6-15-12-18-12 3-27 2-39-4-8 3-15 10-18 20-3-.2-5 0-7 0Z" fill="${HAIR}"/>
-    <path d="M40 23q18-7 38 2" stroke="#3b2c24" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>
-    ${arm}
-  </svg>`;
+export function mascot(pose = "encourage", { size = 120, anim = "idle" } = {}) {
+  return `<span class="mascot anim-${anim}" style="--s:${size}px" aria-hidden="true"><img src="assets/mascot/${pose}.webp" alt="" draggable="false"></span>`;
 }
 
 /* ---- confetti ---------------------------------------------------------------- */
-export function confetti(host, { count = 110, colors = ["#ff7a1a", "#3cb46e", "#2fa5e9", "#e5487e", "#f5b301"] } = {}) {
+export function confetti(host, { count = 110, colors = ["#2e5a41", "#8ea762", "#f5a04a", "#5d8fb5", "#d7775b", "#d7ae45"] } = {}) {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const c = document.createElement("canvas");
   c.className = "confetti";

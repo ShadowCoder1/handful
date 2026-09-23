@@ -124,7 +124,7 @@ function draw(s, lm) {
   for (const [a, b] of BONES) { const A = P(lm[a]), B = P(lm[b]); ctx.beginPath(); ctx.moveTo(...A); ctx.lineTo(...B); ctx.stroke(); }
   for (let i = 0; i < 21; i++) {
     const [x, y] = P(lm[i]);
-    ctx.fillStyle = [4, 8, 12, 16, 20].includes(i) ? "#ff7a1a" : "#ffffff";
+    ctx.fillStyle = [4, 8, 12, 16, 20].includes(i) ? "#f5a04a" : "#ffffff";
     ctx.beginPath(); ctx.arc(x, y, [4, 8, 12, 16, 20].includes(i) ? 4.5 : 3.2, 0, Math.PI * 2); ctx.fill();
   }
 }
