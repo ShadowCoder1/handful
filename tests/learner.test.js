@@ -67,3 +67,16 @@ test("the streak counts days the goal was met and lapses after a missed day", ()
   assert.equal(s.streak, 1);
   assert.equal(s.days[dayKey(t0)].xp, 10);
 });
+
+test("unverified practice (the camera couldn't decide) never costs memory, and adds only a little", () => {
+  const L = newLetter();
+  record(L, { how: "recall", correct: true, now: 0 });
+  const before = { ...L };
+  record(L, { how: "unverified", correct: null, now: 3600e3 });
+  assert.equal(L.h, before.h, "half-life unchanged");
+  assert.equal(L.lapses, before.lapses);
+  assert.equal(L.streak, before.streak);
+  assert.equal(L.lastT, before.lastT, "not a retrieval, so the forgetting clock is not reset");
+  assert.ok(L.pL > before.pL && L.pL - before.pL < 0.06);
+  assert.equal(L.seen, before.seen + 1);
+});

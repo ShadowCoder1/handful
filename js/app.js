@@ -313,7 +313,7 @@ async function lesson(id) {
 
   function footer({ left = "", button = "Check", disabled = false, tone = "", verdict = null, auto = 0, onClick }) {
     foot.className = `foot ${tone}`;
-    footin.innerHTML = `${verdict ? `<div class="verdict"><div class="badge">${tone === "good" ? ICON.check({ size: 40 }) : ICON.close({ size: 40 })}</div><div><h3>${esc(verdict.title)}</h3>${verdict.text ? `<p>${esc(verdict.text)}</p>` : ""}</div></div>` : left || "<span></span>"}
+    footin.innerHTML = `${verdict ? `<div class="verdict"><div class="badge">${tone === "good" ? ICON.check({ size: 40 }) : tone === "info" ? ICON.eye({ size: 40 }) : ICON.close({ size: 40 })}</div><div><h3>${esc(verdict.title)}</h3>${verdict.text ? `<p>${esc(verdict.text)}</p>` : ""}</div></div>` : left || "<span></span>"}
       <button class="btn ${tone === "good" ? "good" : tone === "bad" ? "bad" : ""} ${auto ? "autobar" : ""}" style="${auto ? `--auto:${auto}ms` : ""}" ${disabled ? "disabled" : ""}>${esc(button)}</button>`;
     const btn = footin.querySelector(".btn:last-child");
     btn.addEventListener("click", () => onClick?.());
@@ -325,18 +325,21 @@ async function lesson(id) {
   }
 
   /* One answer in: update the learner, the combo, and show the verdict. */
+  // correct === null: the camera couldn't decide (js/signer.js GENTLE_TRIES). No
+  // verdict either way: it isn't counted in the lesson's score and the combo stands.
   function answered({ correct, letter, how, rival, part, text, auto = 0, helped = false, again = true }) {
-    L.total++;
+    if (correct !== null) L.total++;
     if (letter) {
       record(letterOf(S, letter), { how, correct, now: now(), rival, part });
       L.touched.add(letter);
     }
-    if (correct) { L.right++; L.combo++; L.best = Math.max(L.best, L.combo); sfx.right(); }
+    if (correct === null) { /* practice only */ }
+    else if (correct) { L.right++; L.combo++; L.best = Math.max(L.best, L.combo); sfx.right(); }
     else { L.combo = 0; sfx.wrong(); if (letter && again) L.items = requeue(L.items, L.i, letter, { camera: L.camera }); }
     setCombo();
     persist();
-    const title = correct ? pickOne(helped ? PRAISE_AFTER_HELP : PRAISE) : "Not this time";
-    footer({ tone: correct ? "good" : "bad", verdict: { title, text }, button: "Continue", auto, onClick: nextItem });
+    const title = correct === null ? "Counted as practice" : correct ? pickOne(helped ? PRAISE_AFTER_HELP : PRAISE) : "Not this time";
+    footer({ tone: correct === null ? "info" : correct ? "good" : "bad", verdict: { title, text }, button: "Continue", auto, onClick: nextItem });
   }
 
   function nextItem() {
@@ -409,13 +412,19 @@ async function lesson(id) {
         model: await getModel(), hand: S.hand, letter: l, mode: copy ? "copy" : check ? "check" : "recall",
         onProgress: (p) => { hold.style.setProperty("--p", p); cam.classList.toggle("holding", p > 0.05); },
         onHint: (h) => {
-          sfx.wrong();
-          say(h.text, "warn");
+          if (h.tone !== "info") sfx.wrong();
+          say(h.text, h.tone === "info" ? "" : "warn");
           if (h.showPicture && !picwrap.innerHTML) picwrap.innerHTML = `<img class="pic ${flip(l)}" src="${pic(l)}" alt=""><div class="caption">Copy this</div>`;
         },
         onStatus: (s) => say(s, "", "think"),
         onDone: (r) => {
           if (r.skipped) { nextItem(); return; }
+          if (r.how === "unverified") {
+            say("I couldn't check this one, so it counts as practice.", "", "think");
+            if (!picwrap.innerHTML) picwrap.innerHTML = `<img class="pic ${flip(l)}" src="${pic(l)}" alt="">`;
+            answered({ correct: null, letter: l, how: "unverified", text: `The camera finds ${l} hard to check, so this one counts as practice. ${TIPS[l].gist}` });
+            return;
+          }
           hold.classList.toggle("win", r.correct);
           if (r.correct) say(r.misses ? "There it is." : "Perfect.", "", "cheer");
           if (!r.correct && !picwrap.innerHTML) picwrap.innerHTML = `<img class="pic ${flip(l)}" src="${pic(l)}" alt="">`;
@@ -447,7 +456,7 @@ async function lesson(id) {
       run = runSign({
         model: await getModel(), hand: S.hand, letter: l, mode: "recall",
         onProgress: (p) => hold.style.setProperty("--p", p),
-        onHint: (h) => { sfx.wrong(); say(h.text, "warn"); if (h.showPicture) picwrap.innerHTML = `<img class="pic ${flip(l)}" src="${pic(l)}" alt="">`; },
+        onHint: (h) => { if (h.tone !== "info") sfx.wrong(); say(h.text, h.tone === "info" ? "" : "warn"); if (h.showPicture) picwrap.innerHTML = `<img class="pic ${flip(l)}" src="${pic(l)}" alt="">`; },
         onStatus: (s) => say(s),
         onDone: (r) => {
           missesTotal += r.misses;
@@ -455,7 +464,7 @@ async function lesson(id) {
           L.touched.add(l);
           tiles[k].classList.remove("now"); tiles[k].classList.add("ok"); sfx.hold();
           k++;
-          if (k < word.length) { tiles[k].classList.add("now"); say("Next letter.", "", "happy"); letterRun(); }
+          if (k < word.length) { tiles[k].classList.add("now"); say(r.how === "unverified" ? "I couldn't check that one, so it counts as practice. Next letter." : "Next letter.", "", "happy"); letterRun(); }
           else {
             say("You spelled it!", "", "cheer");
             L.total++; L.right += missesTotal === 0 ? 1 : 0; if (missesTotal === 0) { L.combo++; L.best = Math.max(L.best, L.combo); } setCombo();

@@ -92,3 +92,31 @@ test("a different letter next: the held pose is not graded against it", () => {
   assert.equal(next.done, null, "nothing graded while the old L is still held");
   assert.equal(next.hints.length, 0);
 });
+
+/* Letters the grader is not reliable enough to judge (tier 2: C H O P Q R T U,
+ * held-out false rejects up to 57% for H). Its own rule is that a learner is
+ * never told "no" on them: a rejection reads as "couldn't tell", is never a
+ * miss, and after three the exercise ends as unverified practice. */
+test("a tier-2 letter is never marked wrong: rejections read as 'couldn't tell' and end as practice", () => {
+  assert.equal(model.tiers.H, 2);
+  const { done, hints } = play("Y", "H", "recall", "right", 6);
+  assert.ok(done, JSON.stringify(hints));
+  assert.equal(done.correct, null);
+  assert.equal(done.how, "unverified");
+  assert.equal(done.misses, 0, "a rejection on a tier-2 letter is not a miss");
+  assert.ok(hints.length >= 2 && hints.every((h) => h.tone === "info"), JSON.stringify(hints));
+  assert.ok(hints.every((h) => !/looks like/i.test(h.text)), "no claim about what the hand looked like");
+});
+
+test("in a check, a tier-2 letter also ends unverified, and the picture is never shown", () => {
+  const { done, hints } = play("Y", "H", "check", "right", 6);
+  assert.equal(done?.correct, null);
+  assert.equal(done.how, "unverified");
+  assert.ok(hints.every((h) => !h.showPicture), JSON.stringify(hints));
+});
+
+test("a tier-1 letter keeps its verdicts", () => {
+  assert.equal(model.tiers.L, 1);
+  const { done } = play("Y", "L", "check", "right", 4);
+  assert.equal(done?.correct, false);
+});

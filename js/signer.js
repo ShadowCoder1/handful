@@ -21,6 +21,16 @@ import { LETTERS } from "../tutor/letters.js";
 import { hint, madeInstead, TIPS } from "./course.js";
 import { onFrame } from "./camera.js";
 
+/* Letters the grader marks tier 2 (tutor/model.json: C H O P Q R T U) did not
+ * clear its own held-out bar: it rejects correct ones too often (H 57%, P 42%
+ * of the time). The grader's rule is that no learner is told "no" on them
+ * (tutor/verifier.js, opts.ignoreTier). So a rejection here reads as "couldn't
+ * tell", is never counted as a miss, and after GENTLE_TRIES the exercise ends
+ * as unverified practice, which costs the learner nothing (js/learner.js). An
+ * accept is still an accept. */
+export const GENTLE_TRIES = 3;
+export const isGentle = (model, letter) => model?.tiers?.[letter] === 2;
+
 let engine = null, engineHand = null;
 let lastRight = null;   // the letter most recently signed correctly, if the hand may still be holding it
 export function getEngine(model, hand) {
@@ -46,6 +56,8 @@ export function getEngine(model, hand) {
 export function runSign({ model, hand, letter, mode, onProgress, onHint, onStatus, onDone, subscribe = onFrame }) {
   const eng = getEngine(model, hand);
   let trial = 0, misses = 0, finished = false, lastRival = null, lastPart = null, helped = 0;
+  const gentle = isGentle(model, letter);
+  let unsure = 0;
   // The same letter again straight after getting it right: keep holding and
   // it counts. Any other letter needs the hand to change first.
   const start = () => eng.startTrial({ id: `h${Date.now()}_${trial}`, letter, kind: "teach" }, { carryOver: trial++ === 0 && lastRight === letter });
@@ -73,6 +85,17 @@ export function runSign({ model, hand, letter, mode, onProgress, onHint, onStatu
     if (a.outcome === "accept") {
       const how = mode === "copy" ? "copy" : helped === 0 ? "recall" : helped === 1 ? "nudged" : "assisted";
       finish({ correct: true, how, misses });
+      return;
+    }
+    if (gentle && a.outcome === "reject") {
+      unsure++;
+      if (unsure >= GENTLE_TRIES) { finish({ correct: null, how: "unverified", misses }); return; }
+      const compare = unsure >= 2 && mode !== "check";
+      if (compare) helped = Math.max(helped, 3);   // a sign made after comparing with the picture is practice
+      onHint({ level: 0, tone: "info", showPicture: compare,
+        text: unsure < 2 ? "I couldn't tell. Hold it again, a little clearer."
+          : compare ? `Still not sure. ${letter} is hard for the camera to check. Compare yours with the picture and hold it once more.`
+          : "Still not sure. Hold it once more." });
       return;
     }
     if (a.repeat) { onStatus("Same shape as before. Change something and hold again."); return; }

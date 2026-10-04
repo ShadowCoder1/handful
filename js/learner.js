@@ -64,7 +64,7 @@ export const isMastered = (L) => !!L && L.pL >= MASTERY;
  * Record one answer.
  * @param {object} L          the letter's record (mutated and returned)
  * @param {object} a
- * @param {"recall"|"nudged"|"copy"|"recognise"|"assisted"} a.how
+ * @param {"recall"|"nudged"|"copy"|"recognise"|"assisted"|"unverified"} a.how
  * @param {boolean} a.correct
  * @param {number} a.now
  * @param {string|null} [a.rival]   the letter the grader saw instead
@@ -81,6 +81,14 @@ export function record(L, { how, correct, now, rival = null, part = null }) {
     // tracked on its own and moves the hand skill only a little.
     L.recog = trace(L.recog, correct, EVIDENCE.recognise);
     if (correct) L.pL = L.pL + (1 - L.pL) * 0.03;
+    return L;
+  }
+
+  if (how === "unverified") {
+    // The camera couldn't decide (a letter it cannot check reliably; js/signer.js
+    // GENTLE_TRIES). Practice, never a miss; and not a retrieval either, so the
+    // forgetting clock and the half-life are left alone.
+    L.pL = L.pL + (1 - L.pL) * 0.05;
     return L;
   }
 

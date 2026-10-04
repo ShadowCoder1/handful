@@ -344,6 +344,9 @@ a { color: inherit; }
 .foot .btn { min-width: 170px; }
 .foot.good { background: var(--good-soft); border-color: transparent; }
 .foot.bad { background: var(--bad-soft); border-color: transparent; }
+.foot.info { background: var(--sage-soft); border-color: transparent; }
+.foot.info .badge { color: var(--sage-ink); }
+.foot.info h3, .foot.info .verdict p { color: var(--sage-ink); }
 .verdict { display: flex; align-items: center; gap: 18px; animation: slideup .3s var(--ease); }
 .verdict .badge { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: #fff; flex: none; }
 .verdict .badge .ico { width: 40px; height: 40px; }
